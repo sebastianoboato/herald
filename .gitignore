@@ -1,0 +1,9 @@
+# Course material
+course/
+
+# Secrets
+.env
+.env.*
+
+# Temporary files
+tmp/
