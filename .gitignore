@@ -1,9 +1,27 @@
-# Course material
-course/
+# Instructor's course material (not ours to publish)
+/course/
+
+# Course tracking: private until shared with the instructor
+/docs/course/
 
 # Secrets
 .env
 .env.*
+!.env.example
 
-# Temporary files
+# Claude Code local settings (CLAUDE.md stays versioned)
+.claude/settings.local.json
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+
+# Logs and temporary files
+*.log
 tmp/
+
+# Build output (TypeScript / Node)
+node_modules/
+dist/
+coverage/

@@ -305,11 +305,18 @@ tests/
 
 ## 15. Open decisions
 
-1. **Implementation language:** TypeScript (Node, npm distribution) or Go (single binary). *To be decided.*
+These are decided during development, when working code gives evidence, not in advance.
+
+1. ~~**Implementation language**~~ — decided: **TypeScript** (Node).
 2. **One LLM call or three:** a single call returning changelog, guide and message as structured output, or one call per text.
 3. **Previous tag detection rules:** semantic version ordering vs. git ancestry; behaviour for the very first release (no previous tag).
 4. **How the user is notified** after an automatic release (GitHub notification only, or a message).
-5. **Multiple pending releases:** behaviour when several tags arrive close together (serialized by the workflow; confirm ordering).
+5. **Multiple pending releases:** behaviour when several tags arrive close together. By default GitHub keeps only one waiting run per concurrency group and cancels it when a newer one arrives (`queue: max` changes this); ordering is not guaranteed.
+6. **Where the ledger is read from:** the tag checkout contains the ledger as it was at the tag, without records written after it. A re-run of the same release must not rely on that copy.
+7. **Retrying a partially published release:** drafts are not stored (§7: `DraftStore` only with manual approval), so a retry needs new texts or a place to keep them.
+8. **Guide and ledger in one commit or two:** one commit requires the docs publisher and the ledger to cooperate, which the ports do not provide yet.
+9. **When `publishing` is persisted:** the ledger is written at the end of a run, so `publishing` (§6.3) is never saved; it becomes necessary with non-idempotent channels (§10).
+10. **Where the short message is published:** the first channels are the GitHub release and the docs file; neither is assigned the message yet (increment 2).
 
 ## 16. Implementation guidelines
 
