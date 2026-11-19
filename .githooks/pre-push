@@ -1,5 +1,7 @@
 #!/bin/sh
 # Runs before every push. If anything fails, nothing is pushed.
+#   any branch: lint, type check, build
+#   main:       also the tests
 # Skip in an emergency with: git push --no-verify
 set -e
 
@@ -9,7 +11,17 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
+# Git lists what is being pushed, one line each: <local ref> <local sha> <remote ref> <remote sha>
+run_tests=no
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    run_tests=yes
+  fi
+done
+
 npm run lint
 npm run typecheck
-npm run test
+if [ "$run_tests" = yes ]; then
+  npm run test
+fi
 npm run build

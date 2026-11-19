@@ -389,7 +389,7 @@ branch: main              # where guide and ledger are committed
 - **Invariant tests:** two concurrent `release` runs on the same tag produce one delivery per channel; a re-run after a partial failure retries only the missing channels; a crash between publish and ledger write does not duplicate an idempotent channel.
 - **Check tests:** wrong version, broken link, over-length text, empty section each lead to `blocked`.
 - **Adapter tests:** git adapter against a temporary repository with tags; GitHub and LLM adapters behind contract tests that can run against fakes and, optionally, real services.
-- **Checks:** lint, type check, tests and build run in a pre-push git hook (`.githooks/pre-push`); a failure cancels the push. Releases of Herald itself only from `main`.
+- **Checks:** a pre-push git hook (`.githooks/pre-push`) runs lint, type check and build before every push, and the tests too when pushing `main`; a failure cancels the push. Releases of Herald itself only from `main`.
 
 ## 13. Increments
 
