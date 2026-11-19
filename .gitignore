@@ -17,6 +17,9 @@
 Thumbs.db
 .idea/
 
+# Exported copies of versioned documents
+/docs/ARCHITECTURE.pdf
+
 # Logs and temporary files
 *.log
 tmp/

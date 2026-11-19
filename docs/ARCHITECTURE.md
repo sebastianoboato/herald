@@ -6,6 +6,126 @@ This document describes the architecture agreed so far. It is the starting point
 
 ---
 
+## Architecture view
+
+Status: **proposed** — nothing is built yet. Both views cover increments 1–3 (§13).
+
+### Overview
+
+```mermaid
+flowchart LR
+    dev(["Developer"])
+    actions["GitHub Actions"]
+    herald["herald CLI<br/>one process, on a laptop or the CI runner"]
+    gemini["Gemini API"]
+    releases["GitHub Releases"]
+    users(["End users"])
+
+    subgraph repo["Target repository"]
+        history[("git history and tags<br/>authoritative: what changed")]
+        context[("context.md and docs")]
+        guides[("guides in docs/whats-new/")]
+        ledger[("ledger.json on main<br/>authoritative: what was published")]
+    end
+
+    dev -->|"pushes a tag"| actions
+    actions -->|"runs herald release"| herald
+    dev -.->|"or runs it by hand"| herald
+    history -->|"what changed"| herald
+    context -->|"product knowledge"| herald
+    herald <-->|"prompts and texts"| gemini
+    herald -->|"publishes"| releases
+    herald -->|"publishes"| guides
+    herald -->|"records"| ledger
+    releases -->|"read by"| users
+    guides -->|"read by"| users
+
+    classDef external stroke-dasharray:5 5
+    classDef authoritative stroke-width:3px
+    class actions,gemini,releases external
+    class history,ledger authoritative
+```
+
+### Detailed view
+
+The `herald` box opened up: the core, its ports and the adapters that connect them to the outside.
+
+```mermaid
+flowchart TB
+    dev(["Developer"])
+    users(["End users"])
+    actions["GitHub Actions<br/>workflow triggered by tags v*"]
+
+    subgraph herald["herald CLI: one process, on the developer's machine or the CI runner"]
+        cli["cli and composition root<br/>parse the command, read the config,<br/>build the adapters"]
+        subgraph core["core"]
+            usecases["use cases<br/>preview · release · status"]
+            rules["rules<br/>release states · checks · context selection<br/>privacy levels · prompts<br/>(7) checks decide: approved or blocked"]
+            ports{{"ports<br/>ChangeSource · ProductContext · Writer<br/>Publisher · Ledger"}}
+        end
+        subgraph adapters["adapters: each port also has a fake for tests"]
+            gitA["git"]
+            filesA["repository files"]
+            writerA["Gemini writer"]
+            relA["GitHub release publisher"]
+            docsA["docs publisher"]
+            ledgerA["ledger file"]
+        end
+    end
+
+    subgraph repo["Target repository: git, hosted on GitHub"]
+        config[(".herald/config.yml<br/>settings, written by the developer")]
+        context[(".herald/context.md and docs/<br/>product knowledge, written by the developer")]
+        history[("git history and tags<br/>authoritative: what changed")]
+        ledger[(".herald/ledger.json on main<br/>authoritative: what was published")]
+        guides[("docs/whats-new/<br/>published guides")]
+    end
+
+    gemini["Gemini API"]
+    releases["GitHub Releases<br/>one release per tag"]
+
+    dev -->|"(1) pushes tag v1.3.0"| actions
+    actions -->|"(2) runs herald release v1.3.0"| cli
+    dev -.->|"or runs herald preview / release by hand"| cli
+    cli -->|"reads at startup"| config
+    cli -->|"calls"| usecases
+    usecases --> rules
+    usecases --> ports
+    adapters -.->|"implement"| ports
+    ledgerA -->|"(3) reads the state"| ledger
+    gitA -->|"(4) reads commits and diffs since the previous tag"| history
+    filesA -->|"(5) reads"| context
+    writerA -->|"(6) sends prompts, gets three texts"| gemini
+    relA -->|"(8) creates or updates"| releases
+    docsA -->|"(9) writes the guide"| guides
+    ledgerA -->|"(10) records the new state"| ledger
+    users -->|"read"| releases
+    users -->|"read"| guides
+
+    classDef external stroke-dasharray:5 5
+    classDef authoritative stroke-width:3px
+    class actions,gemini,releases external
+    class history,ledger authoritative
+```
+
+**How to read it**
+- **Dashed border:** external system, outside Herald's control.
+- **Thick border:** authoritative data, the source of truth when copies disagree.
+- **Numbers:** the order of one automatic `herald release` run. `herald preview` does steps 4–7 and prints the texts instead of publishing them.
+- **Dependency rule:** `cli` calls the core; adapters implement the ports the core defines. The core depends on neither.
+
+**Important contracts** (assumptions one part makes about another)
+- **Ports:** defined by the core; adapters must fit them, not the other way round.
+- **Workflow → herald:** tags matching `v*` start a run; the workflow passes `GITHUB_TOKEN` (permission to write repository contents) and `HERALD_LLM_API_KEY`. Pushes made with `GITHUB_TOKEN` do not start new workflow runs.
+- **`config.yml` and `ledger.json`:** file formats Herald relies on; the ledger carries a `version` field so its format can evolve.
+- **GitHub Releases:** one release per tag, so publishing again updates it instead of duplicating it. This is what makes re-runs safe (§10).
+- **Gemini API:** prompts in, text out, within free-tier limits and terms.
+
+**Open in this view**
+- Step 3: which copy of the ledger a CI run reads (§15, question 6).
+- Steps 9–10: one commit or two (§15, question 8).
+- Not shown: chat channels and manual approval, the next architectural change (§13, increments 4–5).
+
 ## 1. Purpose
 
 When a release is tagged, Herald automatically:
