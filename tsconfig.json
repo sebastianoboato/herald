@@ -1,0 +1,23 @@
+{
+  // Type checking for sources and tests. `npm run build` uses tsconfig.build.json.
+  "compilerOptions": {
+    "target": "es2024",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    // Sources import each other with `.ts` extensions so Node can run them directly
+    // (`npm run herald`); the build rewrites them to `.js`.
+    "rewriteRelativeImportExtensions": true,
+    // Only TypeScript syntax that Node can strip: no enums, namespaces or parameter properties.
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["src", "tests"]
+}

@@ -1,0 +1,15 @@
+#!/bin/sh
+# Runs before every push. If anything fails, nothing is pushed.
+# Skip in an emergency with: git push --no-verify
+set -e
+
+# Check exactly what is being pushed: refuse if there are uncommitted changes.
+if [ -n "$(git status --porcelain)" ]; then
+  echo "pre-push: commit or stash your changes first, so the checks test what you push."
+  exit 1
+fi
+
+npm run lint
+npm run typecheck
+npm run test
+npm run build

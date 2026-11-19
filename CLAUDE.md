@@ -13,7 +13,7 @@ Herald announces releases and explains them to users. Read `docs/ARCHITECTURE.md
 ## Workflow rules
 - One issue in progress at a time; a short-lived branch per issue; `main` is always releasable.
 - Each issue describes the feature only: goal, Given/When/Then scenarios, and scope (in/out). Issues do not mention claims; links between work and claims live in `docs/course/`.
-- Before merging: CI green and the branch diff reread. Tags only from `main` with green CI.
+- Lint, type check, tests and build run in the pre-push hook (`.githooks/pre-push`); nothing is pushed unless they pass. Before merging: the branch diff reread. Tags only from `main`.
 - Commit messages reference the issue (`refs #N`, `closes #N`).
 
 ## Course tracking
