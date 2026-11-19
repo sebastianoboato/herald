@@ -238,7 +238,7 @@ Every command shows its progress step by step in the terminal.
 |---|---|
 | `Release` | tag, previous tag, state, timestamps |
 | `ChangeSet` | commits (message, author, date), changed files (path, status, size), optional diff excerpts |
-| `ProductContext` | product description, audience, glossary, feature areas, relevant documentation pages, user-visible files |
+| `ProductKnowledge` | product description, audience, glossary, feature areas, relevant documentation pages, user-visible files (loaded through the `ProductContext` port) |
 | `Draft` | `changelog`, `guide`, `message`, plus metadata (provider, model, prompt version) |
 | `Delivery` | channel, state, external id, timestamp, error |
 
@@ -389,7 +389,7 @@ branch: main              # where guide and ledger are committed
 - **Invariant tests:** two concurrent `release` runs on the same tag produce one delivery per channel; a re-run after a partial failure retries only the missing channels; a crash between publish and ledger write does not duplicate an idempotent channel.
 - **Check tests:** wrong version, broken link, over-length text, empty section each lead to `blocked`.
 - **Adapter tests:** git adapter against a temporary repository with tags; GitHub and LLM adapters behind contract tests that can run against fakes and, optionally, real services.
-- **CI:** lint and tests on every push; releases of Herald itself only from `main` with green CI.
+- **Checks:** a pre-push git hook (`.githooks/pre-push`) runs lint, type check and build before every push, and the tests too when pushing `main`; a failure cancels the push. Releases of Herald itself only from `main`.
 
 ## 13. Increments
 

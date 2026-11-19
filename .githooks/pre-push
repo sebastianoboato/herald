@@ -1,0 +1,27 @@
+#!/bin/sh
+# Runs before every push. If anything fails, nothing is pushed.
+#   any branch: lint, type check, build
+#   main:       also the tests
+# Skip in an emergency with: git push --no-verify
+set -e
+
+# Check exactly what is being pushed: refuse if there are uncommitted changes.
+if [ -n "$(git status --porcelain)" ]; then
+  echo "pre-push: commit or stash your changes first, so the checks test what you push."
+  exit 1
+fi
+
+# Git lists what is being pushed, one line each: <local ref> <local sha> <remote ref> <remote sha>
+run_tests=no
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    run_tests=yes
+  fi
+done
+
+npm run lint
+npm run typecheck
+if [ "$run_tests" = yes ]; then
+  npm run test
+fi
+npm run build
