@@ -15,7 +15,7 @@ Herald announces releases and explains them to users. Read `docs/ARCHITECTURE.md
 - Each issue describes the feature only: goal, Given/When/Then scenarios, and scope (in/out). Issues do not mention claims; links between work and claims live in `docs/course/`.
 - The pre-push hook (`.githooks/pre-push`) runs lint, type check and build before every push, and the tests too when pushing `main`; nothing is pushed unless they pass. Before merging: the branch diff reread. Tags only from `main`.
 - Git hooks are tested on a throwaway copy of the project: a new repository in a temporary folder, with a local folder as fake remote, one push per case, then the folder is deleted. Never by committing or pushing in this repository.
-- Commit messages reference the issue (`refs #N`, `closes #N`).
+- Branch names start with the issue number (`N-short-name`). Commit messages don't reference the issue; the issue is closed by hand after the merge is pushed.
 
 ## Course tracking
 This repository is also a course portfolio. The tracking files in `docs/course/` are private (git-ignored) until shared with the instructor. After significant work:
