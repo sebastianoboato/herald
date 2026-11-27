@@ -3,6 +3,7 @@
 #   any branch: lint, type check, build
 #   main:       also the tests
 # Skip in an emergency with: git push --no-verify
+# Turn on once per clone with: npm run setup-hooks
 set -e
 
 # Check exactly what is being pushed: refuse if there are uncommitted changes.

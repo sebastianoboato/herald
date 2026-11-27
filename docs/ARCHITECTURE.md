@@ -207,7 +207,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # full history and tags; required for git log/diff between tags
-      # install herald (method depends on the implementation language)
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+      - run: npm install -g https://github.com/sebastianoboato/herald/releases/download/vX.Y.Z/herald-X.Y.Z.tgz
       - run: herald release ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -217,6 +220,7 @@ jobs:
 Notes:
 - The tag checkout is a detached HEAD. Commits (guide, ledger) go to the **default branch**, fetched explicitly, never to the tag.
 - Pushes made with `GITHUB_TOKEN` do not trigger new workflow runs, so committing the ledger does not loop.
+- The workflow installs a fixed Herald version: a new release reaches a repository only when its owner changes the version in the install line.
 
 ## 5. Commands
 
@@ -389,7 +393,8 @@ branch: main              # where guide and ledger are committed
 - **Invariant tests:** two concurrent `release` runs on the same tag produce one delivery per channel; a re-run after a partial failure retries only the missing channels; a crash between publish and ledger write does not duplicate an idempotent channel.
 - **Check tests:** wrong version, broken link, over-length text, empty section each lead to `blocked`.
 - **Adapter tests:** git adapter against a temporary repository with tags; GitHub and LLM adapters behind contract tests that can run against fakes and, optionally, real services.
-- **Checks:** a pre-push git hook (`.githooks/pre-push`) runs lint, type check and build before every push, and the tests too when pushing `main`; a failure cancels the push. Releases of Herald itself only from `main`.
+- **Checks:** a pre-push git hook (`.githooks/pre-push`, turned on with `npm run setup-hooks`) runs lint, type check and build before every push, and the tests too when pushing `main`; a failure cancels the push.
+- **Releasing Herald:** the Release workflow (`.github/workflows/release.yml`), started by hand, repeats the checks after a clean install on a GitHub machine, packs Herald and runs `herald --help` from the installed package. Only on `main`, and only if everything passed, it tags the checked commit and creates a GitHub Release with that package and its sha256. Steps in the README, "Release it".
 
 ## 13. Increments
 
@@ -437,6 +442,7 @@ These are decided during development, when working code gives evidence, not in a
 8. **Guide and ledger in one commit or two:** one commit requires the docs publisher and the ledger to cooperate, which the ports do not provide yet.
 9. **When `publishing` is persisted:** the ledger is written at the end of a run, so `publishing` (§6.3) is never saved; it becomes necessary with non-idempotent channels (§10).
 10. **Where the short message is published:** the first channels are the GitHub release and the docs file; neither is assigned the message yet (increment 2).
+11. **Repositories whose tags are created by a workflow:** a tag created with `GITHUB_TOKEN`, as release tools do at the end of a release workflow, does not start other workflows, so Herald's trigger on tag push never fires there. Such repositories could run `herald release` as a step of their own release workflow, or use another token. Which setups Herald supports is decided with increment 3.
 
 ## 16. Implementation guidelines
 
