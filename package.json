@@ -7,6 +7,9 @@
   "bin": {
     "herald": "dist/cli/main.js"
   },
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=26"
   },
@@ -16,6 +19,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "herald": "node src/cli/main.ts",
+    "smoke-test": "sh scripts/smoke-test.sh",
     "prepare": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
