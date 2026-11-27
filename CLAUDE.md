@@ -5,7 +5,7 @@ Herald announces releases and explains them to users. Read `docs/ARCHITECTURE.md
 ## Architecture rules
 - Hexagonal architecture: `cli -> core <- adapters`. The core never imports from `adapters/` or `cli/`.
 - Every port has a fake adapter; core tests use fakes only.
-- No business logic in workflow YAML: workflows only install and call `herald`.
+- No business logic in workflow YAML: workflows in target repositories only install and call `herald`; Herald's own release workflow runs its checks through npm scripts, so they can be run locally too.
 - Configuration is read only by the composition root.
 - Everything in English: names, commands, messages, documentation.
 - Open questions in `docs/ARCHITECTURE.md` §15 are decided during development, once working code gives evidence. Do not settle them in advance; raise them when the related code is being written.
@@ -13,7 +13,7 @@ Herald announces releases and explains them to users. Read `docs/ARCHITECTURE.md
 ## Workflow rules
 - One issue in progress at a time; a short-lived branch per issue; `main` is always releasable.
 - Each issue describes the feature only: goal, Given/When/Then scenarios, and scope (in/out). Issues do not mention claims; links between work and claims live in `docs/course/`.
-- The pre-push hook (`.githooks/pre-push`) runs lint, type check and build before every push, and the tests too when pushing `main`; nothing is pushed unless they pass. Before merging: the branch diff reread. Tags only from `main`.
+- The pre-push hook (`.githooks/pre-push`) runs lint, type check and build before every push, and the tests too when pushing `main`; nothing is pushed unless they pass. Before merging: the branch diff reread. Releases only through the Release workflow on `main` (README, "Release it"); it creates the tag, never by hand.
 - Git hooks are tested on a throwaway copy of the project: a new repository in a temporary folder, with a local folder as fake remote, one push per case, then the folder is deleted. Never by committing or pushing in this repository.
 - Branch names start with the issue number (`N-short-name`). Commit messages don't reference the issue; the issue is closed by hand after the merge is pushed.
 
