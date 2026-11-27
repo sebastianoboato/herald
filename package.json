@@ -21,6 +21,7 @@
     "herald": "node src/cli/main.ts",
     "smoke-test": "sh scripts/smoke-test.sh",
     "release-guard": "sh scripts/release-guard.sh",
+    "release-check": "npm run lint && npm run typecheck && npm run test && npm run build",
     "setup-hooks": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
