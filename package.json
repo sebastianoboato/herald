@@ -20,7 +20,7 @@
     "test": "vitest run",
     "herald": "node src/cli/main.ts",
     "smoke-test": "sh scripts/smoke-test.sh",
-    "prepare": "git config core.hooksPath .githooks"
+    "setup-hooks": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
