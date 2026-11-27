@@ -20,6 +20,7 @@
     "test": "vitest run",
     "herald": "node src/cli/main.ts",
     "smoke-test": "sh scripts/smoke-test.sh",
+    "release-guard": "sh scripts/release-guard.sh",
     "setup-hooks": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
